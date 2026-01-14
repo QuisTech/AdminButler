@@ -25,6 +25,8 @@ abstract class Document
     required this.status,
     required this.createdAt,
     required this.userId,
+    this.draft,
+    this.replyDraft,
   });
 
   factory Document({
@@ -38,6 +40,8 @@ abstract class Document
     required String status,
     required DateTime createdAt,
     required int userId,
+    String? draft,
+    String? replyDraft,
   }) = _DocumentImpl;
 
   factory Document.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -56,6 +60,8 @@ abstract class Document
         jsonSerialization['createdAt'],
       ),
       userId: jsonSerialization['userId'] as int,
+      draft: jsonSerialization['draft'] as String?,
+      replyDraft: jsonSerialization['replyDraft'] as String?,
     );
   }
 
@@ -84,6 +90,10 @@ abstract class Document
 
   int userId;
 
+  String? draft;
+
+  String? replyDraft;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -101,6 +111,8 @@ abstract class Document
     String? status,
     DateTime? createdAt,
     int? userId,
+    String? draft,
+    String? replyDraft,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -116,6 +128,8 @@ abstract class Document
       'status': status,
       'createdAt': createdAt.toJson(),
       'userId': userId,
+      if (draft != null) 'draft': draft,
+      if (replyDraft != null) 'replyDraft': replyDraft,
     };
   }
 
@@ -133,6 +147,8 @@ abstract class Document
       'status': status,
       'createdAt': createdAt.toJson(),
       'userId': userId,
+      if (draft != null) 'draft': draft,
+      if (replyDraft != null) 'replyDraft': replyDraft,
     };
   }
 
@@ -180,6 +196,8 @@ class _DocumentImpl extends Document {
     required String status,
     required DateTime createdAt,
     required int userId,
+    String? draft,
+    String? replyDraft,
   }) : super._(
          id: id,
          fileName: fileName,
@@ -191,6 +209,8 @@ class _DocumentImpl extends Document {
          status: status,
          createdAt: createdAt,
          userId: userId,
+         draft: draft,
+         replyDraft: replyDraft,
        );
 
   /// Returns a shallow copy of this [Document]
@@ -208,6 +228,8 @@ class _DocumentImpl extends Document {
     String? status,
     DateTime? createdAt,
     int? userId,
+    Object? draft = _Undefined,
+    Object? replyDraft = _Undefined,
   }) {
     return Document(
       id: id is int? ? id : this.id,
@@ -220,6 +242,8 @@ class _DocumentImpl extends Document {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       userId: userId ?? this.userId,
+      draft: draft is String? ? draft : this.draft,
+      replyDraft: replyDraft is String? ? replyDraft : this.replyDraft,
     );
   }
 }
@@ -273,6 +297,16 @@ class DocumentUpdateTable extends _i1.UpdateTable<DocumentTable> {
     table.userId,
     value,
   );
+
+  _i1.ColumnValue<String, String> draft(String? value) => _i1.ColumnValue(
+    table.draft,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> replyDraft(String? value) => _i1.ColumnValue(
+    table.replyDraft,
+    value,
+  );
 }
 
 class DocumentTable extends _i1.Table<int?> {
@@ -314,6 +348,14 @@ class DocumentTable extends _i1.Table<int?> {
       'userId',
       this,
     );
+    draft = _i1.ColumnString(
+      'draft',
+      this,
+    );
+    replyDraft = _i1.ColumnString(
+      'replyDraft',
+      this,
+    );
   }
 
   late final DocumentUpdateTable updateTable;
@@ -336,6 +378,10 @@ class DocumentTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt userId;
 
+  late final _i1.ColumnString draft;
+
+  late final _i1.ColumnString replyDraft;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -348,6 +394,8 @@ class DocumentTable extends _i1.Table<int?> {
     status,
     createdAt,
     userId,
+    draft,
+    replyDraft,
   ];
 }
 

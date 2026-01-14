@@ -24,6 +24,8 @@ abstract class Document implements _i1.SerializableModel {
     required this.status,
     required this.createdAt,
     required this.userId,
+    this.draft,
+    this.replyDraft,
   });
 
   factory Document({
@@ -37,6 +39,8 @@ abstract class Document implements _i1.SerializableModel {
     required String status,
     required DateTime createdAt,
     required int userId,
+    String? draft,
+    String? replyDraft,
   }) = _DocumentImpl;
 
   factory Document.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -55,6 +59,8 @@ abstract class Document implements _i1.SerializableModel {
         jsonSerialization['createdAt'],
       ),
       userId: jsonSerialization['userId'] as int,
+      draft: jsonSerialization['draft'] as String?,
+      replyDraft: jsonSerialization['replyDraft'] as String?,
     );
   }
 
@@ -81,6 +87,10 @@ abstract class Document implements _i1.SerializableModel {
 
   int userId;
 
+  String? draft;
+
+  String? replyDraft;
+
   /// Returns a shallow copy of this [Document]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -95,6 +105,8 @@ abstract class Document implements _i1.SerializableModel {
     String? status,
     DateTime? createdAt,
     int? userId,
+    String? draft,
+    String? replyDraft,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -110,6 +122,8 @@ abstract class Document implements _i1.SerializableModel {
       'status': status,
       'createdAt': createdAt.toJson(),
       'userId': userId,
+      if (draft != null) 'draft': draft,
+      if (replyDraft != null) 'replyDraft': replyDraft,
     };
   }
 
@@ -133,6 +147,8 @@ class _DocumentImpl extends Document {
     required String status,
     required DateTime createdAt,
     required int userId,
+    String? draft,
+    String? replyDraft,
   }) : super._(
          id: id,
          fileName: fileName,
@@ -144,6 +160,8 @@ class _DocumentImpl extends Document {
          status: status,
          createdAt: createdAt,
          userId: userId,
+         draft: draft,
+         replyDraft: replyDraft,
        );
 
   /// Returns a shallow copy of this [Document]
@@ -161,6 +179,8 @@ class _DocumentImpl extends Document {
     String? status,
     DateTime? createdAt,
     int? userId,
+    Object? draft = _Undefined,
+    Object? replyDraft = _Undefined,
   }) {
     return Document(
       id: id is int? ? id : this.id,
@@ -173,6 +193,8 @@ class _DocumentImpl extends Document {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       userId: userId ?? this.userId,
+      draft: draft is String? ? draft : this.draft,
+      replyDraft: replyDraft is String? ? replyDraft : this.replyDraft,
     );
   }
 }

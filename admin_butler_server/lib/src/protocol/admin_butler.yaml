@@ -10,3 +10,5 @@ fields:
   status: String
   createdAt: DateTime
   userId: int
+  draft: String?
+  replyDraft: String?

@@ -242,6 +242,55 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  void _showDraftModal(Document doc) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.auto_awesome, color: Color(0xFF6366F1)),
+                const SizedBox(width: 8),
+                Text(
+                  "Butler George's Suggestion",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              doc.replyDraft ?? "I haven't prepared a draft for this document yet, sir.",
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.copy),
+                label: const Text("Copy Draft"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDocumentCard(Document doc) {
     final bool isError = doc.status == "error";
     final Color categoryColor = _getCategoryColor(doc.category);
@@ -284,15 +333,30 @@ class _DashboardPageState extends State<DashboardPage> {
               Row(
                 children: [
                   if (doc.amount != null)
-                    _buildInfoChip(Icons.attach_money, "\${doc.amount!.toStringAsFixed(2)}", Colors.green),
+                    _buildInfoChip(Icons.attach_money, "\$${doc.amount!.toStringAsFixed(2)}", Colors.green),
                   if (doc.dueDate != null)
                     _buildInfoChip(
                       Icons.calendar_today,
-                      "Due: \${DateFormat('MMM dd').format(doc.dueDate!)}",
+                      "Due: ${DateFormat('MMM dd').format(doc.dueDate!)}",
                       Colors.amber,
                     ),
                 ],
               ),
+            if (doc.replyDraft != null) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showDraftModal(doc),
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: const Text("View Draft Reply"),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF6366F1),
+                    side: const BorderSide(color: Color(0xFF6366F1)),
+                  ),
+                ),
+              ),
+            ],
             if (isError)
               const Padding(
                 padding: EdgeInsets.only(top: 8),

@@ -32,6 +32,7 @@ Extract the following information from this document image:
 - dueDate: the due date if found (format: YYYY-MM-DD), otherwise null
 - amount: the total amount if found (number), otherwise null
 - category: one of [bill, receipt, letter, other]
+- draft: a professional 2-3 sentence draft response or action recommendation based on the document.
 
 Return ONLY a JSON object.
 ''';
@@ -68,6 +69,7 @@ Return ONLY a JSON object.
             : null,
         amount: data['amount']?.toDouble(),
         category: data['category'] ?? "other",
+        replyDraft: data['draft'], // Assign the generated draft
         status: "pending",
         createdAt: DateTime.now().toUtc(),
         userId: 0,
