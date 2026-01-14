@@ -11,8 +11,9 @@ web/app
 # Directory created by dartdoc
 doc/api/
 
-# Passwords file
+# Credentials
 config/passwords.yaml
-
-# Firebase service account key for Firebase auth
-config/firebase_service_account_key.json
+key.txt
+*.txt
+output.txt
+models_list*.txt
