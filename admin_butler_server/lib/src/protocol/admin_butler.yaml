@@ -1,0 +1,12 @@
+﻿class: Document
+table: document
+fields:
+  fileName: String
+  fileUrl: String?
+  summary: String
+  dueDate: DateTime?
+  amount: double?
+  category: String
+  status: String
+  createdAt: DateTime
+  userId: int

@@ -1,0 +1,6 @@
+document:
+  - hello:
+  - scanDocument:
+  - getDocuments:
+greeting:
+  - hello:

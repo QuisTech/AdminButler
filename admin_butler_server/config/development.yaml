@@ -1,0 +1,35 @@
+# Configuration for the development server.
+apiServer:
+  port: 8085
+  publicHost: localhost
+  publicPort: 8085
+  publicScheme: http
+  # Allow requests from the Flutter Web dev server
+  extraWebOrigins:
+    - http://localhost:42245
+    - http://localhost:8080
+
+webServer:
+  port: 8086
+  publicHost: localhost
+  publicPort: 8086
+  publicScheme: http
+
+insightsServer:
+  port: 8087
+  publicHost: localhost
+  publicPort: 8087
+  publicScheme: http
+
+database:
+  host: localhost
+  port: 8093
+  name: admin_butler
+  user: postgres
+  # Password is set in passwords.yaml
+
+redis:
+  host: localhost
+  port: 8094
+  user: default
+  # Password is set in passwords.yaml
