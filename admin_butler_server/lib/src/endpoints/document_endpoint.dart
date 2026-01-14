@@ -22,7 +22,7 @@ class DocumentEndpoint extends Endpoint {
       }
 
       final model = GenerativeModel(
-        model: "gemini-1.5-pro",
+        model: "gemini-3-pro-image-preview",
         apiKey: geminiApiKey,
       );
 
