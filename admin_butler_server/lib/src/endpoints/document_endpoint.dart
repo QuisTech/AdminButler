@@ -1,6 +1,7 @@
 import "package:serverpod/serverpod.dart";
 import "package:google_generative_ai/google_generative_ai.dart";
 import "dart:convert";
+import "dart:typed_data";
 import "package:admin_butler_server/src/generated/protocol.dart";
 
 class DocumentEndpoint extends Endpoint {
@@ -13,83 +14,56 @@ class DocumentEndpoint extends Endpoint {
 
   Future<Document> scanDocument(Session session, String imageBase64) async {
     try {
-      // Get Gemini API key from session
-      final geminiApiKey = session.passwords["geminiApiKey"];
-      if (geminiApiKey == null) {
-        throw Exception(
-          "Gemini API key not configured. Add it to config/passwords.yaml",
-        );
-      }
-
-      final model = GenerativeModel(
-        model: "gemini-3-pro-image-preview",
-        apiKey: geminiApiKey,
-      );
-
-      final prompt = '''
-Extract the following information from this document image:
-- summary: a 1-sentence summary of what the document is
-- dueDate: the due date if found (format: YYYY-MM-DD), otherwise null
-- amount: the total amount if found (number), otherwise null
-- category: one of [bill, receipt, letter, other]
-- draft: a professional 2-3 sentence draft response or action recommendation based on the document.
-
-Return ONLY a JSON object.
-''';
-
-      // Call Gemini API
-      final response = await model.generateContent([
-        Content.multi([
-          TextPart(prompt),
-          DataPart('image/jpeg', base64Decode(imageBase64)),
-        ]),
-      ]);
-
-      final text = response.text;
-      if (text == null) throw Exception("No response from Gemini");
-
-      // Simple JSON parsing
-      Map<String, dynamic> data = {};
+      final imageBytes = base64Decode(imageBase64);
+      final fileName = "scan_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      
+      // 1. Save to Serverpod File Storage (Immediate)
+      String? fileUrl;
       try {
-        final jsonStart = text.indexOf('{');
-        final jsonEnd = text.lastIndexOf('}') + 1;
-        if (jsonStart >= 0 && jsonEnd > jsonStart) {
-          data = jsonDecode(text.substring(jsonStart, jsonEnd));
-        }
+        await session.storage.storeFile(
+          storageId: 'public',
+          path: 'documents/$fileName',
+          byteData: ByteData.view(imageBytes.buffer),
+        );
+        final publicUrl = await session.storage.getPublicUrl(
+          storageId: 'public',
+          path: 'documents/$fileName',
+        );
+        fileUrl = publicUrl?.toString();
       } catch (e) {
-        session.log("Error parsing JSON: $e");
+        session.log("Storage failed: $e", level: LogLevel.warning);
       }
 
-      // Create document
+      // 2. Create Initial "Processing" Document
       final document = Document(
-        fileName: "scan_${DateTime.now().millisecondsSinceEpoch}.jpg",
-        summary: data['summary'] ?? text,
-        dueDate: data['dueDate'] != null
-            ? DateTime.tryParse(data['dueDate'])
-            : null,
-        amount: data['amount']?.toDouble(),
-        category: data['category'] ?? "other",
-        replyDraft: data['draft'], // Assign the generated draft
-        status: "pending",
+        fileName: fileName,
+        fileUrl: fileUrl,
+        summary: "Butler George is analyzing this for you, sir...",
+        category: "pending",
+        status: "processing",
         createdAt: DateTime.now().toUtc(),
         userId: 0,
       );
 
-      _documents.add(document);
+      // Save to DB
+      final inserted = await Document.db.insertRow(session, document);
+      
+      // 3. Schedule Background Analysis (Asynchronous)
+      // This will call DocumentAnalysisCall.invoke in the background
+      await session.serverpod.futureCallWithDelay(
+        'documentAnalysisCall',
+        inserted,
+        const Duration(milliseconds: 100),
+      );
 
-      // Try to save to DB, but skip if it fails (for demo without DB)
-      try {
-        await Document.db.insertRow(session, document);
-      } catch (e) {
-        session.log("Database insert failed (using in-memory): $e");
-      }
-
-      return document;
+      // 4. Return immediately to the client
+      _documents.insert(0, inserted);
+      return inserted;
     } catch (e) {
-      session.log("Error scanning document: $e", level: LogLevel.error);
+      session.log("Error starting scan: $e", level: LogLevel.error);
       return Document(
         fileName: "error.jpg",
-        summary: "Error: $e",
+        summary: "Error starting scan: $e",
         category: "error",
         status: "error",
         createdAt: DateTime.now().toUtc(),

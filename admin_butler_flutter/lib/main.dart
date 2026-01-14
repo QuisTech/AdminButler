@@ -328,7 +328,24 @@ class _DashboardPageState extends State<DashboardPage> {
               doc.summary,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 8),
+            if (doc.fileUrl != null) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  doc.fileUrl!,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 120,
+                    color: Colors.white.withOpacity(0.05),
+                    child: const Icon(Icons.image_not_supported, color: Colors.white24),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
             if (doc.amount != null || doc.dueDate != null)
               Row(
                 children: [
