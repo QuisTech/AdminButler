@@ -69,6 +69,7 @@ Return ONLY a JSON object.
       document.status = "processed";
 
       await Document.db.updateRow(session, document);
+      
       session.log("Background analysis complete for document: ${document.id}");
       
     } catch (e) {
