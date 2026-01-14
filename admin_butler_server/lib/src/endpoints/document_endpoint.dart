@@ -17,7 +17,29 @@ class DocumentEndpoint extends Endpoint {
       final imageBytes = base64Decode(imageBase64);
       final fileName = "scan_${DateTime.now().millisecondsSinceEpoch}.jpg";
       
-      // 1. Save to Serverpod File Storage (Immediate)
+      // Get Gemini API key
+      final geminiApiKey = session.passwords["geminiApiKey"];
+      if (geminiApiKey == null) {
+        throw Exception("Gemini API key not configured");
+      }
+
+      final model = GenerativeModel(
+        model: "gemini-3-pro-image-preview",
+        apiKey: geminiApiKey,
+      );
+
+      final prompt = '''
+Extract the following information from this document image:
+- summary: a 1-sentence summary of what the document is
+- dueDate: the due date if found (format: YYYY-MM-DD), otherwise null
+- amount: the total amount if found (number), otherwise null
+- category: one of [bill, receipt, letter, other]
+- draft: a professional 2-3 sentence draft response or action recommendation based on the document.
+
+Return ONLY a JSON object.
+''';
+
+      // 1. Save to Serverpod File Storage
       String? fileUrl;
       try {
         await session.storage.storeFile(
@@ -34,36 +56,60 @@ class DocumentEndpoint extends Endpoint {
         session.log("Storage failed: $e", level: LogLevel.warning);
       }
 
-      // 2. Create Initial "Processing" Document
+      // 2. Call Gemini
+      final response = await model.generateContent([
+        Content.multi([
+          TextPart(prompt),
+          DataPart('image/jpeg', imageBytes),
+        ]),
+      ]);
+
+      final text = response.text;
+      if (text == null) throw Exception("No response from Gemini");
+
+      // 3. Parse JSON
+      Map<String, dynamic> data = {};
+      try {
+        final jsonStart = text.indexOf('{');
+        final jsonEnd = text.lastIndexOf('}') + 1;
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          data = jsonDecode(text.substring(jsonStart, jsonEnd));
+        }
+      } catch (e) {
+        session.log("Error parsing JSON: $e");
+      }
+
+      // 4. Create document
       final document = Document(
         fileName: fileName,
         fileUrl: fileUrl,
-        summary: "Butler George is analyzing this for you, sir...",
-        category: "pending",
-        status: "processing",
+        summary: data['summary'] ?? text,
+        dueDate: data['dueDate'] != null
+            ? DateTime.tryParse(data['dueDate'])
+            : null,
+        amount: data['amount']?.toDouble(),
+        category: data['category'] ?? "other",
+        replyDraft: data['draft'],
+        status: "processed",
         createdAt: DateTime.now().toUtc(),
         userId: 0,
       );
 
-      // Save to DB
-      final inserted = await Document.db.insertRow(session, document);
-      
-      // 3. Schedule Background Analysis (Asynchronous)
-      // This will call DocumentAnalysisCall.invoke in the background
-      await session.serverpod.futureCallWithDelay(
-        'documentAnalysisCall',
-        inserted,
-        const Duration(milliseconds: 100),
-      );
-
-      // 4. Return immediately to the client
-      _documents.insert(0, inserted);
-      return inserted;
+      // 5. Save to DB
+      try {
+        final inserted = await Document.db.insertRow(session, document);
+        _documents.insert(0, inserted);
+        return inserted;
+      } catch (e) {
+        session.log("Database insert failed: $e");
+        _documents.insert(0, document);
+        return document;
+      }
     } catch (e) {
-      session.log("Error starting scan: $e", level: LogLevel.error);
+      session.log("Error scanning document: $e", level: LogLevel.error);
       return Document(
         fileName: "error.jpg",
-        summary: "Error starting scan: $e",
+        summary: "Error: $e",
         category: "error",
         status: "error",
         createdAt: DateTime.now().toUtc(),

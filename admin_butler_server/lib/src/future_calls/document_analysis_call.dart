@@ -61,22 +61,26 @@ Return ONLY a JSON object.
       }
 
       // Update document with results
-      document.summary = data['summary'] ?? text;
-      document.dueDate = data['dueDate'] != null ? DateTime.tryParse(data['dueDate']) : null;
-      document.amount = data['amount']?.toDouble();
-      document.category = data['category'] ?? "other";
-      document.replyDraft = data['draft'];
-      document.status = "processed";
+      final updatedDocument = document.copyWith(
+        summary: data['summary'] ?? text,
+        dueDate: data['dueDate'] != null ? DateTime.tryParse(data['dueDate']) : null,
+        amount: data['amount']?.toDouble(),
+        category: data['category'] ?? "other",
+        replyDraft: data['draft'],
+        status: "processed",
+      );
 
-      await Document.db.updateRow(session, document);
+      await Document.db.updateRow(session, updatedDocument);
       
       session.log("Background analysis complete for document: ${document.id}");
       
     } catch (e) {
       session.log("Analysis failed for document ${document.id}: $e", level: LogLevel.error);
-      document.status = "error";
-      document.summary = "Analysis failed: $e";
-      await Document.db.updateRow(session, document);
+      final errorDocument = document.copyWith(
+        status: "error",
+        summary: "Analysis failed: $e",
+      );
+      await Document.db.updateRow(session, errorDocument);
     }
   }
 }
