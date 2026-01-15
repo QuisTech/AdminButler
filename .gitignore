@@ -1,0 +1,37 @@
+# Secrets and sensitive files
+config/passwords.yaml
+config/.env
+.env
+.env.local
+config/.env.development
+config/.env.production
+
+# Build and dependency files
+.dart_tool/
+build/
+.packages
+pubspec.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/
+flutter_export_environment.sh
+
+# Docker
+.docker/
+
+# Logs
+*.log
+nohup.out
+server.log
