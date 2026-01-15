@@ -9,7 +9,7 @@ void main() async {
         port: 8090,
         database: 'admin_butler',
         username: 'postgres',
-        password: 'mysecretpassword',
+        password: Platform.environment['DB_PASSWORD'] ?? 'development',
       ),
       settings: ConnectionSettings(
         sslMode: SslMode.disable,

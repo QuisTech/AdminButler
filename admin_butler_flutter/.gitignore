@@ -28,6 +28,20 @@
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
+.fvm/
+
+# Secrets
+.env
+.env.local
+.env.development
+.env.production
+*.key
+*.pem
+
+# Build artifacts
+build/
+android/build/
+ios/Pods/
 .pub/
 /build/
 

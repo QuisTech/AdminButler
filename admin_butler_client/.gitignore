@@ -11,3 +11,15 @@ build/
 
 # Directory created by dartdoc
 doc/api/
+
+# Secrets and credentials
+.env
+.env.local
+*.key
+*.pem
+config/
+
+# IDE
+.idea/
+.vscode/
+*.iml

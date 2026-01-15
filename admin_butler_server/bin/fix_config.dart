@@ -1,13 +1,11 @@
 import 'dart:io';
 
 void main() async {
-  final content = '''
-# Configuration for development server
-development:
-  database: 'mysecretpassword'
-  serviceSecret: 'somerandomservicesecret12345'
-  geminiApiKey: 'AIzaSyCn36VozffzGtttGrjj00qF8aDWcNr8FBaQ'
-''';
-  await File('config/passwords.yaml').writeAsString(content);
-  print('Written passwords.yaml');
+  print('❌ ERROR: This script is deprecated!');
+  print('Use environment variables instead:');
+  print('  export DB_PASSWORD="your_password"');
+  print('  export REDIS_PASSWORD="your_password"');
+  print('  export GEMINI_API_KEY="your_key"');
+  print('Then run: ./start_app.sh');
+  exit(1);
 }

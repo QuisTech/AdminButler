@@ -11,9 +11,29 @@ web/app
 # Directory created by dartdoc
 doc/api/
 
-# Credentials
+# Credentials and secrets
 config/passwords.yaml
+config/.env
+.env
+.env.local
+.env.development
+.env.production
 key.txt
 *.txt
 output.txt
 models_list*.txt
+
+# Test and debug outputs
+*.log
+nohup.out
+server.log
+analyze_*.txt
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Database and cache
+.firebase/
+.firebaserc
